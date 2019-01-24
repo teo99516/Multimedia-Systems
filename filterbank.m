@@ -5,9 +5,9 @@ function frameF = filterbank(frameT, frameType, winType)
      N=length(frameT(:,1));
     %Kaiser windows
     %a=4 for N=2048 and a=6 for N=256
-    if( winType=="KBN")
+    if( winType=="KBD")
         
-        w=kaiser(1024,4)  ; 
+        w=kaiser(1024,4); 
 
         w_left_2048=zeros(1024,1);
         w_right_2048=zeros(1024,1);
@@ -73,23 +73,23 @@ function frameF = filterbank(frameT, frameType, winType)
         end
     end
     % Calculate MDCT
-    if (frameType == "ESH")
-        N = 256;
-        frameF = zeros(N/2,8);
-%         n = 0:N-1;
-%         k = 0:N/2-1;
-%         cosineArgs = (2 * pi * ( n + (N/2 + 1)/2 ) / N)' * (k + 1/2);
-        for i = 1:8
-%             frameF(:,i) = 2 * sum(frames(:,i).*cos(cosineArgs));
-            frameF(:,i) = mdct4(frames(:,i));
-        end
-    else
-%         N = 2048;
-%         n = 0:N-1;
-%         k = 0:N/2-1;
-%         frameF = 2 * sum(frameT .* cos((2 * pi * ( n + (N/2 + 1)/2 ) / N)' * k + 1/2))';
-        frameF = mdct4(frameT);
-    end
+    frameF = mdct4(frames);
+    % Or calculate it "by the book"
+    % if (frameType == "ESH")
+    %     N = 256;
+    %     frameF = zeros(N/2,8);
+    %     n = 0:N-1;
+    %     k = 0:N/2-1;
+    %     cosineArgs = (2 * pi * ( n + (N/2 + 1)/2 ) / N)' * (k + 1/2);
+    %     for i = 1:8
+    %         frameF(:,i) = 2 * sum(frames(:,i).*cos(cosineArgs));
+    %     end
+    % else
+    %     N = 2048;
+    %     n = 0:N-1;
+    %     k = 0:N/2-1;
+    %     frameF = 2 * sum(frameT .* cos((2 * pi * ( n + (N/2 + 1)/2 ) / N)' * k + 1/2))';
+    % end
     
 end
 
