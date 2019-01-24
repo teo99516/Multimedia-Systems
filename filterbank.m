@@ -72,15 +72,16 @@ function frameF = filterbank(frameT, frameType, winType)
             frames(129:256,i)=frames(129:256, i).*w_right_256;
         end
     end
+    % Calculate MDCT
     if (frameType == "ESH")
         N = 256;
         frameF = zeros(N/2,8);
 %         n = 0:N-1;
 %         k = 0:N/2-1;
 %         cosineArgs = (2 * pi * ( n + (N/2 + 1)/2 ) / N)' * (k + 1/2);
-        for i = 0:7
-%             frameF(:,i + 1) = 2 * sum(frameT((N/2)*i + (449:704)).*cos(cosineArgs));
-            frameF(:,i + 1) = mdct4(frameT((N/2)*i + (449:704)));
+        for i = 1:8
+%             frameF(:,i) = 2 * sum(frames(:,i).*cos(cosineArgs));
+            frameF(:,i) = mdct4(frames(:,i));
         end
     else
 %         N = 2048;
