@@ -38,9 +38,9 @@ function frameF = filterbank(frameT, frameType, winType)
          end 
          for n=1:(256/2)
              if(n<=128)
-                w_left_2048(n)= sin( (pi/N)*(n+1/2)  );
+                w_left_256(n)= sin( (pi/256)*(n+1/2)  );
             else
-                w_right_2048(n-128)=sin( (pi/N)*(n+1/2)  );
+                w_right_256(n-128)=sin( (pi/256)*(n+1/2)  );
             end
         end
     end
