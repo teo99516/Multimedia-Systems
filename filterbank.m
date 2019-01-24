@@ -29,20 +29,25 @@ function frameF = filterbank(frameT, frameType, winType)
         end
     else
         %Sinusoid windows
-        for n=1:(N)
-            if(n<=N/2)
+        w_left_2048=zeros(1024,1);
+        w_right_2048=zeros(1024,1);
+        for n=1:2048
+            if(n<=1024)
                 w_left_2048(n)= sin( (pi/N)*(n+1/2)  );
             else
                 w_right_2048(n-N/2)=sin( (pi/N)*(n+1/2)  );
             end
-         end 
+        end 
+         w_left_256=zeros(128,1);
+        w_right_256=zeros(128,1);
          for n=1:(256/2)
              if(n<=128)
                 w_left_256(n)= sin( (pi/256)*(n+1/2)  );
             else
                 w_right_256(n-128)=sin( (pi/256)*(n+1/2)  );
             end
-        end
+         end
+        disp( length(w_left_2048) );
     end
     
     
