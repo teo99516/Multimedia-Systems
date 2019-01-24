@@ -5,4 +5,5 @@ Function SSC
 
 Function filterbank
 - Implementation of MDCT(http://www.ee.columbia.edu/~marios/mdct/mdct_giraffe.html)
+- Kaiser function(with pi or not?)
 
