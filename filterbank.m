@@ -2,12 +2,12 @@ function frameF = filterbank(frameT, frameType, winType)
 %winType: 
     %-KBN
     %-SIN
-     N=length(frameT(:,1));
+    N=length(frameT(:,1));
     %Kaiser windows
     %a=4 for N=2048 and a=6 for N=256
     if( winType=="KBD")
         
-        w=kaiser(1024,4); 
+        w=kaiser(1024+1,4*pi); 
 
         w_left_2048=zeros(1024,1);
         w_right_2048=zeros(1024,1);
@@ -17,7 +17,7 @@ function frameF = filterbank(frameT, frameType, winType)
            w_right_2048(1025-n)=sqrt( sum(w(1:n) )/sum(w(1:N/2)) ) ;
         end
         
-        w=kaiser(128,6);
+        w=kaiser(128+1,6*pi);
         
         w_left_256=zeros(128,1);
         w_right_256=zeros(128,1);
@@ -65,17 +65,18 @@ function frameF = filterbank(frameT, frameType, winType)
     else
         %Keep the 1152 in the middle and make 8 subframes of 256 samples 
         frameT=frameT(449:1600);
-        %Make a 265X8 array with the 8 subsamples
-        frames= buffer(frameT, 256, 128, 'nodelay');
+        %Make a 256X8 array with the 8 subsamples
+        frames = buffer(frameT, 256, 128, 'nodelay');
         for i=1:8
             frames(1:128,i)=frames(1:128, i).*w_left_256;
             frames(129:256,i)=frames(129:256, i).*w_right_256;
         end
     end
     % Calculate MDCT
-    frameF = mdct4(frames);
-    % Or calculate it "by the book"
-    % if (frameType == "ESH")
+    
+    if (frameType == "ESH")
+        frameF = mdct4(frames);
+    %     Or calculate it "by the book"
     %     N = 256;
     %     frameF = zeros(N/2,8);
     %     n = 0:N-1;
@@ -84,12 +85,13 @@ function frameF = filterbank(frameT, frameType, winType)
     %     for i = 1:8
     %         frameF(:,i) = 2 * sum(frames(:,i).*cos(cosineArgs));
     %     end
-    % else
+    else
+        frameF = mdct4(frameT);
     %     N = 2048;
     %     n = 0:N-1;
     %     k = 0:N/2-1;
     %     frameF = 2 * sum(frameT .* cos((2 * pi * ( n + (N/2 + 1)/2 ) / N)' * k + 1/2))';
-    % end
+    end
     
 end
 

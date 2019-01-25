@@ -2,7 +2,6 @@ function frameT = iFilterbank(frameF, frameType, winType)
 % Returns iMDCT transformed input frameF 1024x2 as frameT
 %
 
-
 if (frameType == "ESH")
     frames = imdct4(frameF);
 else
@@ -72,3 +71,4 @@ t = (0:(3*M-1)).';
 y(t+1,:) =  rot(t+M+1,:);
 t = (3*M:(twoN-1)).';
 y(t+1,:) = -rot(t-3*M+1,:);
+end
