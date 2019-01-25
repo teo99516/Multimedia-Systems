@@ -2,12 +2,84 @@ function frameT = iFilterbank(frameF, frameType, winType)
 % Returns iMDCT transformed input frameF 1024x2 as frameT
 %
 
-if (frameType == "ESH")
-    frames = imdct4(frameF);
-else
-    frameT = imdct4(frameT);
-end
+    if (frameType == "ESH")
+        frames = imdct4(frameF);
+    else
+        frameT = imdct4(frameF);
+    end
+    
+    N = 2048;
+    if( winType=="KBD")
+        
+        w=kaiser(1024+1,4*pi); 
 
+        w_left_2048=zeros(1024,1);
+        w_right_2048=zeros(1024,1);
+        for n=1:(N/2)
+            %Left an right KBN windows (w-left is the inverse of w_right)
+           w_left_2048(n)=sqrt( sum(w(1:n) )/sum(w(1:N/2)) ) ;
+           w_right_2048(1025-n)=sqrt( sum(w(1:n) )/sum(w(1:N/2)) ) ;
+        end
+        
+        w=kaiser(128+1,6*pi);
+        
+        w_left_256=zeros(128,1);
+        w_right_256=zeros(128,1);
+        for n=1:(256/2)
+            %Left an right KBN windows (w-left is the inverse of w_right)
+           w_left_256(n)=sqrt( sum(w(1:n) )/sum(w(1:128)) ) ;
+           w_right_256(129-n)=sqrt( sum(w(1:n) )/sum(w(1:128)) ) ;
+        end
+    else
+        %Sinusoid windows
+        w_left_2048=zeros(1024,1);
+        w_right_2048=zeros(1024,1);
+        for n=1:2048
+            if(n<=1024)
+                w_left_2048(n)= sin( (pi/N)*(n+1/2)  );
+            else
+                w_right_2048(n-N/2)=sin( (pi/N)*(n+1/2)  );
+            end
+        end 
+         w_left_256=zeros(128,1);
+        w_right_256=zeros(128,1);
+         for n=1:(256/2)
+             if(n<=128)
+                w_left_256(n)= sin( (pi/256)*(n+1/2)  );
+            else
+                w_right_256(n-128)=sin( (pi/256)*(n+1/2)  );
+            end
+         end
+        disp( length(w_left_2048) );
+    end
+    
+    
+    
+    if (frameType=="OLS")
+        frameT(1:N/2,1)=frameT(1:N/2,1).*w_left_2048;
+        frameT(N/2+1:N,1)=frameT(N/2+1:N,1).*w_right_2048;
+    elseif (frameType=="LSS")
+        frameT(1:1024,1)=frameT(1:1024,1).*w_left_2048;
+        frameT(1473:1600,1)=frameT(1473:1600,1).*w_right_256;
+        frameT(1601:N,1)=0;
+    elseif (frameType=="LPS")
+        frameT(1:448,1)=0;
+        frameT(449:576,1)=frameT(449:576,1).*w_left_256;
+        frameT(1025:2048,1)=frameT(1025:2048,1).*w_right_2048;
+    else
+        %Keep the 1152 in the middle and make 8 subframes of 256 samples 
+        frameT=zeros(2048,2);
+        % Aply small window weights to [frames] array
+        for i=1:8
+            frames(1:128,i)=frames(1:128, i).*w_left_256;
+            frames(129:256,i)=frames(129:256, i).*w_right_256;
+            % Inverse buffer the [frames] array into [frameT] array
+            frameT((449:704) + (i-1) * 128) = frameT((449:704) + (i-1) * 128) +...
+                frames(:,i)';
+        end
+        
+        
+    end
 
 end
 
