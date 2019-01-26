@@ -13,8 +13,8 @@ function frameF = filterbank(frameT, frameType, winType)
         w_right_2048=zeros(1024,1);
         for n=1:(N/2)
             %Left an right KBN windows (w-left is the inverse of w_right)
-           w_left_2048(n)=sqrt( sum(w(1:n) )/sum(w(1:N/2)) ) ;
-           w_right_2048(1025-n)=sqrt( sum(w(1:n) )/sum(w(1:N/2)) ) ;
+           w_left_2048(n)=sqrt( sum(w(1:n) )/sum(w(1:N/2+1)) ) ;
+           w_right_2048(1025-n)=sqrt( sum(w(1:n) )/sum(w(1:N/2+1)) ) ;
         end
         
         w=kaiser(128+1,6*pi);
@@ -23,8 +23,8 @@ function frameF = filterbank(frameT, frameType, winType)
         w_right_256=zeros(128,1);
         for n=1:(256/2)
             %Left an right KBN windows (w-left is the inverse of w_right)
-           w_left_256(n)=sqrt( sum(w(1:n) )/sum(w(1:128)) ) ;
-           w_right_256(129-n)=sqrt( sum(w(1:n) )/sum(w(1:128)) ) ;
+           w_left_256(n)=sqrt( sum(w(1:n) )/sum(w(1:128+1)) ) ;
+           w_right_256(129-n)=sqrt( sum(w(1:n) )/sum(w(1:128+1)) ) ;
         end
     else
         %Sinusoid windows
@@ -37,7 +37,7 @@ function frameF = filterbank(frameT, frameType, winType)
                 w_right_2048(n-N/2)=sin( (pi/N)*(n+1/2)  );
             end
         end 
-         w_left_256=zeros(128,1);
+        w_left_256=zeros(128,1);
         w_right_256=zeros(128,1);
          for n=1:(256/2)
              if(n<=128)
@@ -52,30 +52,32 @@ function frameF = filterbank(frameT, frameType, winType)
     
     
     if (frameType=="OLS")
-        frameT(1:N/2)=frameT(1:N/2).*w_left_2048;
-        frameT(N/2+1:N)=frameT(N/2+1:N).*w_right_2048;
+        frameT(1:N/2,:)=frameT(1:N/2,:).*[w_left_2048 w_left_2048];
+        frameT(N/2+1:N,:)=frameT(N/2+1:N,:).*[w_right_2048 w_right_2048];
     elseif (frameType=="LSS")
-        frameT(1:1024)=frameT(1:1024).*w_left_2048;
-        frameT(1473:1600)=frameT(1473:1600).*w_right_256;
-        frameT(1601:N)=0;
+        frameT(1:1024,:)=frameT(1:1024,:).*[w_left_2048 w_left_2048];
+        frameT(1473:1600,:)=frameT(1473:1600,:).*[w_right_256 w_right_256];
+        frameT(1601:N,:)=0;
     elseif (frameType=="LPS")
-        frameT(1:448)=0;
-        frameT(449:576)=frameT(449:576).*w_left_256;
-        frameT(1025:2048)=frameT(1025:2048).*w_right_2048;
+        frameT(1:448,:)=0;
+        frameT(449:576,:)=frameT(449:576,:).*[w_left_256 w_left_256];
+        frameT(1025:2048,:)=frameT(1025:2048,:).*[w_right_2048 w_right_2048];
     else
         %Keep the 1152 in the middle and make 8 subframes of 256 samples 
-        frameT=frameT(449:1600);
+        frameT=frameT(449:1600,:);
         %Make a 256X8 array with the 8 subsamples
-        frames = buffer(frameT, 256, 128, 'nodelay');
+        frames(:,1,:) = buffer(frameT(:,1), 256, 128, 'nodelay');
+        frames(:,2,:) = buffer(frameT(:,2), 256, 128, 'nodelay');
         for i=1:8
-            frames(1:128,i)=frames(1:128, i).*w_left_256;
-            frames(129:256,i)=frames(129:256, i).*w_right_256;
+            frames(1:128,:,i)=frames(1:128,:,i).*[w_left_256 w_left_256];
+            frames(129:256,:,i)=frames(129:256,:,i).*[w_right_256 w_right_256];
         end
     end
     % Calculate MDCT
     
     if (frameType == "ESH")
-        frameF = mdct4(frames);
+        frameF(:,:,1) = mdct4(frames(:,1,:));
+        frameF(:,:,2) = mdct4(frames(:,2,:));
     %     Or calculate it "by the book"
     %     N = 256;
     %     frameF = zeros(N/2,8);
@@ -86,7 +88,8 @@ function frameF = filterbank(frameT, frameType, winType)
     %         frameF(:,i) = 2 * sum(frames(:,i).*cos(cosineArgs));
     %     end
     else
-        frameF = mdct4(frameT);
+        frameF(:,1) = mdct4(frameT(:,1));
+        frameF(:,2) = mdct4(frameT(:,2));
     %     N = 2048;
     %     n = 0:N-1;
     %     k = 0:N/2-1;

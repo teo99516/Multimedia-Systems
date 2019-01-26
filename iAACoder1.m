@@ -1,14 +1,26 @@
 function x = iAACoder1(AACSeq1, fNameOut)
-% Returns MDCT transformed input frameT 1024x2 as frameF
+% Returns decoded
 %
 
 sequence_lentgth = length(AACSeq1);
-x = zeros(sequence_lentgth*1024,2);
+xi = zeros(sequence_lentgth*1024,2);
 for i = 1:sequence_lentgth - 2
-    frameT = iFilterbank([AACSeq1(i).chl.frameF AACSeq1(i).chr.frameF], AACSeq1(i).frameType, AACSeq1(i).winType);
-    x((i-1)*1024 + (1:2048),:) = x((i-1)*1024 + (1:2048),:) + frameT;
+    if (AACSeq1(i).frameType == "ESH")
+        frameF(:,:,1) = AACSeq1(i).chl.frameF;
+        frameF(:,:,2) = AACSeq1(i).chr.frameF;
+        frameT = iFilterbank(frameF, AACSeq1(i).frameType, AACSeq1(i).winType);
+    else
+        frameT = iFilterbank([AACSeq1(i).chl.frameF AACSeq1(i).chr.frameF], AACSeq1(i).frameType, AACSeq1(i).winType);
+    end
+    
+    xi((i-1)*1024 + (1:2048),:) = xi((i-1)*1024 + (1:2048),:) + frameT;
 end
 
-audiowrite(fNameOut,x,48000);
+% Write audio sequence to a file using 48 KHz
+audiowrite(fNameOut,xi,48000);
+
+if(nargout==1)
+    x = xi;
+end
 
 end
