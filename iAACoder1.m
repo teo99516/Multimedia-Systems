@@ -4,7 +4,7 @@ function x = iAACoder1(AACSeq1, fNameOut)
 
 sequence_lentgth = length(AACSeq1);
 xi = zeros(sequence_lentgth*1024,2);
-for i = 1:sequence_lentgth - 2
+for i = 1:sequence_lentgth - 1
     if (AACSeq1(i).frameType == "ESH")
         frameF(:,:,1) = AACSeq1(i).chl.frameF;
         frameF(:,:,2) = AACSeq1(i).chr.frameF;

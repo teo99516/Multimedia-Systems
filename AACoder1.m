@@ -1,7 +1,7 @@
 function AACSeq1 = AACoder1(fNameIn)
 % Returns the encoded AACSeq1 of a given input file as a struct
 %
-windowType = "KBD";
+windowType = "SIN";
 
 audio = audioread(fNameIn);
 

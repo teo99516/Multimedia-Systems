@@ -6,6 +6,26 @@ tic;
 AACSeq1 = AACoder1(fNameIn);
 fprintf('Time elapsed for encoding of AAC Sequence is %f seconds\n',toc);
 tic;
+
+count_ols=0;
+count_esh=0;
+count_lps=0;
+count_lss=0;
+
+eshs = [];
+for i=1:length(AACSeq1)-1
+    if(AACSeq1(i).frameType=="OLS")
+        count_ols=count_ols+1;
+    elseif(AACSeq1(i).frameType=="ESH")
+        count_esh=count_esh+1;
+        eshs = [eshs i];
+    elseif(AACSeq1(i).frameType=="LSS")
+        count_lss=count_lss+1;
+    elseif(AACSeq1(i).frameType=="LPS")
+        count_lps=count_lps+1;
+    end
+end
+
 decodedAudio = iAACoder1(AACSeq1, fNameOut);
 fprintf('Time elapsed for decoding of AAC Sequence is %f seconds\n',toc);
 error = audio(1025:size(decodedAudio,1),:) - decodedAudio(1025:size(decodedAudio,1),:);
