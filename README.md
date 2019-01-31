@@ -3,7 +3,7 @@
 Function SSC
 
 Function filterbank
-
+- Improve KBD SNR
 
 Function TNS
 - Improve quantizer
