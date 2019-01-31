@@ -1,4 +1,4 @@
-function [ frameFout, steady, TNScoeffs ] = TNS(frameFin, frameType)
+function [ frameFout, TNScoeffs ] = TNS(frameFin, frameType)
 
 %frameFin,frameFout: MDCT coefficiences: 128X8 for ESH, else 1024X1 
 
