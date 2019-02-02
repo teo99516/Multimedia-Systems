@@ -26,7 +26,7 @@ function [ frameFout, TNScoeffs ] = TNS(frameFin, frameType)
                 %by taking the root square of band's energy
                 normalization_coef( short_fft(i,2)+1:short_fft(i,3)+1, j )=sqrt(band_energy);
             end
-             %Make values less steep  
+            %Make values less steep  
             for i=127:-1:1
                 normalization_coef(i,j)=( normalization_coef(i, j) + normalization_coef(i+1, j) )/2;
             end
