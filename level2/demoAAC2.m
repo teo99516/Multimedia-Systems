@@ -17,7 +17,5 @@ function SNR = demoAAC2(fNameIn, fNameOut)
     SNR_R = snr(audio(1025:size(decodedAudio,1)-1024,2),audio(1025:size(decodedAudio,1)-1024,2) - decodedAudio(1025:size(decodedAudio,1)-1024,2))
     SNR = snr(audio(1025:size(decodedAudio,1)-1024,:),audio(1025:size(decodedAudio,1)-1024,:) - decodedAudio(1025:size(decodedAudio,1)-1024,:));
 
-
-
-
+    
 end

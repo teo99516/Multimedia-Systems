@@ -49,12 +49,12 @@ function SMR = psycho(frameT, frameType, frameTprev1, frameTprev2)
                 temp1= r_T(n)*cos(phase_T(n))-r_T_pred(n)*cos(phase_pred(n));
                 temp2= r_T(n)*sin(phase_T(n))- r_T_pred(n)*sin(phase_pred(n));
 
-                predictability(n)= sqrt( (temp1)^2 + (temp2)^2 )/( r_T(n) + abs(r_T_pred) );
+                predictability(n)= sqrt( (temp1)^2 + (temp2)^2 )/( r_T(n) + abs(r_T_pred(n)) );
             end
             % Calculate energy and predictability for every band
             for i=1:42
                 energy(i)= sum( r_T(short_fft(i,2)+1:short_fft(i,3)+1 )^2);
-                predictability_2(i)= sum (predictability(short_fft(i,2)+1:short_fft(i,3)+1 )*r_T(long_fft(i,2)+1:long_fft(i,3)+1 )^2 );
+                predictability_2(i)= sum (predictability(short_fft(i,2)+1:short_fft(i,3)+1 )*r_T(short_fft(i,2)+1:short_fft(i,3)+1 )^2 );
             end
             % Combine energy and predictability 
             for n=1:42
@@ -106,7 +106,7 @@ function SMR = psycho(frameT, frameType, frameTprev1, frameTprev2)
 
         % Multiply with Hann windows
         N=length(frameT);
-        hann_2048 = ( 0.5- 0.5*cos(pi*((0:N-1)+0.5)/N) );
+        hann_2048 = ( 0.5- 0.5*cos(pi*((0:N-1)+0.5)/N) )';
         
         Sw_T = frameT .* hann_2048;
         Sw_prev1 = frameTprev1 .* hann_2048; 
@@ -126,22 +126,30 @@ function SMR = psycho(frameT, frameType, frameTprev1, frameTprev2)
         r_prev2= abs(fourier_trans(1:N/2));
         phase_prev2= angle(fourier_trans(1:N/2));
         
+        % Copy symmetric half
+        r_T = [r_T r_T(end:-1:1)];
+        phase_T = [phase_T phase_T(end:-1:1)];
+        r_prev1 = [r_prev1 r_prev1(end:-1:1)];
+        phase_prev1 = [phase_prev1 phase_prev1(end:-1:1)];
+        r_prev2 = [r_prev2 r_prev2(end:-1:1)];
+        phase_prev2 = [phase_prev2 phase_prev2(end:-1:1)];
+        
         % Calculate predicted abs and frequency
         r_T_pred=2*r_prev1-r_prev2;
         phase_pred=2*phase_prev1-phase_prev2;
         
         % Calculate predictability
-        for i=1:N
+        for n=1:N
             temp1= r_T(n)*cos(phase_T(n))-r_T_pred(n)*cos(phase_pred(n));
             temp2= r_T(n)*sin(phase_T(n))- r_T_pred(n)*sin(phase_pred(n));
             
-            predictability(n)= sqrt( (temp1)^2 + (temp2)^2 )/( r_T(n) + abs(r_T_pred) );
+            predictability(n)= sqrt( (temp1)^2 + (temp2)^2 )/( r_T(n) + abs(r_T_pred(n)) );
         end
 
         % Calculate energy and predictability for every band
         for i=1:69
-            energy(i)= sum( r_T(long_fft(i,2)+1:long_fft(i,3)+1 )^2);
-            predictability_2(i)= sum (predictability(long_fft(i,2)+1:long_fft(i,3)+1 )*r_T(long_fft(i,2)+1:long_fft(i,3)+1 )^2 );
+            energy(i)= sum( r_T(long_fft(i,2)+1:long_fft(i,3)+1 ).^2);
+            predictability_2(i)= sum (predictability(long_fft(i,2)+1:long_fft(i,3)+1 ).*r_T(long_fft(i,2)+1:long_fft(i,3)+1 ).^2 );
         end
 
         % Combine energy and predictability 
