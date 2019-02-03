@@ -12,7 +12,7 @@ function SMR = psycho(frameT, frameType, frameTprev1, frameTprev2)
                 short(i,j) = spreadingfun(i, j, short_fft);
             end
         end
-        
+        frameT = buffer(frameT(449:1600),256,128,'nodelay');
         if(size(frameTprev1,2)>1)
             prevFrames = [frameTprev1(:,7:8) frameT(:,1:7)];
         else
@@ -21,7 +21,7 @@ function SMR = psycho(frameT, frameType, frameTprev1, frameTprev2)
         
         for j=1:8
             N=length(frameT(:,j) );
-            hann_256 = ( 0.5 - 0.5*cos(pi*((0:N-1)+0.5)/N) );
+            hann_256 = ( 0.5 - 0.5*cos(pi*((0:N-1)+0.5)/(N/2)) );
             Sw_T = frameT(:,j) .* hann_256;   
             Sw_prev1 = prevFrames(:,j+1) .* hann_256; 
             Sw_prev2 = prevFrames(:,j) .* hann_256;
@@ -45,7 +45,7 @@ function SMR = psycho(frameT, frameType, frameTprev1, frameTprev2)
             phase_pred=2*phase_prev1-phase_prev2;
 
             % Calculate predictability
-            for i=1:N
+            for n=1:N/2
                 temp1= r_T(n)*cos(phase_T(n))-r_T_pred(n)*cos(phase_pred(n));
                 temp2= r_T(n)*sin(phase_T(n))- r_T_pred(n)*sin(phase_pred(n));
 
@@ -53,20 +53,20 @@ function SMR = psycho(frameT, frameType, frameTprev1, frameTprev2)
             end
             % Calculate energy and predictability for every band
             for i=1:42
-                energy(i)= sum( r_T(short_fft(i,2)+1:short_fft(i,3)+1 )^2);
-                predictability_2(i)= sum (predictability(short_fft(i,2)+1:short_fft(i,3)+1 )*r_T(short_fft(i,2)+1:short_fft(i,3)+1 )^2 );
+                energy(i)= sum( r_T(short_fft(i,2)+1:short_fft(i,3)+1 ).^2);
+                predictability_2(i)= sum (predictability(short_fft(i,2)+1:short_fft(i,3)+1 ).*r_T(short_fft(i,2)+1:short_fft(i,3)+1 ).^2 );
             end
             % Combine energy and predictability 
             for n=1:42
-                ecb(n)= sum(energy(1:69)*long(1:69, n));
-                ct(n)= sum(predictability_2(1:69)*long(1:69, n));
+                ecb(n)= sum(energy(1:42)*short(1:42, n));
+                ct(n)= sum(predictability_2(1:42)*short(1:42, n));
 
                 % Normalize predictability and energy 
                 cb(n) = ct(n)/ecb(n);
-                en(n) = ecb(n)/ sum(long(1:69, n) );
+                en(n) = ecb(n)/ sum(short(1:42, n) );
 
                 % Calculate tonality index( values in (0,1) )
-                tb(n) = -0.299 -0.43 *log(cb(n));
+                tb(n) = max(min(-0.299 -0.43 *log(cb(n)),0.999999999),0.0000000001);
 
                 % Noise Masking Tone( in dB)
                 NMT(n) = 6;
@@ -84,7 +84,7 @@ function SMR = psycho(frameT, frameType, frameTprev1, frameTprev2)
                 nb(n) = en(n)*bc(n);
 
                 %Pre-echo control
-                qthr_hat(n) = eps((N/2)*10^(long_fft(n,6)/10));
+                qthr_hat(n) = eps((N/2)*10^(short_fft(n,6)/10));
                 npart(n) = max( nb(n), qthr_hat(n));
 
                 %Calculate SMR
@@ -106,7 +106,7 @@ function SMR = psycho(frameT, frameType, frameTprev1, frameTprev2)
 
         % Multiply with Hann windows
         N=length(frameT);
-        hann_2048 = ( 0.5- 0.5*cos(pi*((0:N-1)+0.5)/N) )';
+        hann_2048 = ( 0.5- 0.5*cos(pi*((0:N-1)+0.5)/(N/2)) )';
         
         Sw_T = frameT .* hann_2048;
         Sw_prev1 = frameTprev1 .* hann_2048; 
@@ -127,24 +127,25 @@ function SMR = psycho(frameT, frameType, frameTprev1, frameTprev2)
         phase_prev2= angle(fourier_trans(1:N/2));
         
         % Copy symmetric half
-        r_T = [r_T r_T(end:-1:1)];
-        phase_T = [phase_T phase_T(end:-1:1)];
-        r_prev1 = [r_prev1 r_prev1(end:-1:1)];
-        phase_prev1 = [phase_prev1 phase_prev1(end:-1:1)];
-        r_prev2 = [r_prev2 r_prev2(end:-1:1)];
-        phase_prev2 = [phase_prev2 phase_prev2(end:-1:1)];
+%         r_T = [r_T r_T(end:-1:1)];
+%         phase_T = [phase_T phase_T(end:-1:1)];
+%         r_prev1 = [r_prev1 r_prev1(end:-1:1)];
+%         phase_prev1 = [phase_prev1 phase_prev1(end:-1:1)];
+%         r_prev2 = [r_prev2 r_prev2(end:-1:1)];
+%         phase_prev2 = [phase_prev2 phase_prev2(end:-1:1)];
         
         % Calculate predicted abs and frequency
         r_T_pred=2*r_prev1-r_prev2;
         phase_pred=2*phase_prev1-phase_prev2;
         
         % Calculate predictability
-        for n=1:N
+        for n=1:N/2
             temp1= r_T(n)*cos(phase_T(n))-r_T_pred(n)*cos(phase_pred(n));
             temp2= r_T(n)*sin(phase_T(n))- r_T_pred(n)*sin(phase_pred(n));
             
             predictability(n)= sqrt( (temp1)^2 + (temp2)^2 )/( r_T(n) + abs(r_T_pred(n)) );
         end
+        predictability = predictability(:);
 
         % Calculate energy and predictability for every band
         for i=1:69
@@ -162,7 +163,7 @@ function SMR = psycho(frameT, frameType, frameTprev1, frameTprev2)
             en(n) = ecb(n)/ sum(long(1:69, n) );
 
             % Calculate tonality index( values in (0,1) )
-            tb(n) = -0.299 -0.43 *log(cb(n));
+            tb(n) =max(min(-0.299 -0.43 *log(cb(n)),0.999999999),0.0000000001);
 
             % Noise Masking Tone( in dB)
             NMT(n) = 6;
