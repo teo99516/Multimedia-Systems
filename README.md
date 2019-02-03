@@ -10,5 +10,4 @@ Function TNS
 - Improve KBD SNR
 
 Functions pcycho
-- Steps 11-13
 - Check functionality
