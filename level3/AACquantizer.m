@@ -11,8 +11,8 @@ if (frameType =="ESH")
     G = zeros(8,1);
     % Scale factors initial values
     alpha_sf = ones(42,8) * (16/3) * log2((max(frameF',2).^(3/4))/8191);
-    alfa_indices = ((0:127) >= short_fft(:,2)) & ((0:127) <= short_fft(:,3));
-    alfa_indices = sum((1:42)*alfa_indices,1);
+    alpha_indices = ((0:127) >= short_fft(:,2)) & ((0:127) <= short_fft(:,3));
+    alpha_indices = sum((1:42)*alpha_indices,1);
     
     for j = 1:8
         % Calculate audibility threshold for each frequency band
@@ -27,9 +27,9 @@ if (frameType =="ESH")
         sfc(2:end,j) = alpha_sf(2:42,j) - alpha_sf(1:41,j);
         while(max(abs(sfc(2:end,j)))<=60)
             % Quantize MDCT values 
-            frameFS(:,j) = sign(frameF(:,j)) .* floor((abs(frameF(:,j)).*2.^(-alpha_sf(alfa_indices)'/4)).^(3/4) + MagicNumber);
+            frameFS(:,j) = sign(frameF(:,j)) .* floor((abs(frameF(:,j)).*2.^(-alpha_sf(alpha_indices)'/4)).^(3/4) + MagicNumber);
             % Restore MDCT values from Quantized vector S
-            frameFX_hat(:,j) = sign(frameFS(:,j)) .* (abs(frameFS(:,j)).^(4/3)) .* 2.^(alpha_sf(alfa_indices)'/4);
+            frameFX_hat(:,j) = sign(frameFS(:,j)) .* (abs(frameFS(:,j)).^(4/3)) .* 2.^(alpha_sf(alpha_indices)'/4);
             % Calculate the error Power of each frequency band
             for n = 1:42
                 P_e(n) = sum((frameF(short_fft(n,2)+1:short_fft(n,3)+1,j) -... 
@@ -45,7 +45,7 @@ if (frameType =="ESH")
         % The while loop's statement has ceased to apply. The last increase
         % transaction must be undone
         alpha_sf(inc,j) = alpha_sf(inc,j) - ones(sum(inc),1);
-        frameFS(:,j) = sign(frameF(:,j)) .* floor((abs(frameF(:,j)).*2.^(-alpha_sf(alfa_indices)'/4)).^(3/4) + MagicNumber);
+        frameFS(:,j) = sign(frameF(:,j)) .* floor((abs(frameF(:,j)).*2.^(-alpha_sf(alpha_indices)'/4)).^(3/4) + MagicNumber);
         sfc(1,j) = alpha_sf(1,j);
         sfc(2:end,j) = alpha_sf(2:42,j) - alpha_sf(1:41,j);
         G(j,1) = alpha_sf(1,j);
@@ -59,8 +59,8 @@ else
     sfc = zeros(69,1);
     % Scale factors initial values
     alpha_sf = ones(69,1) * (16/3) * log2((max(frameF)^(3/4))/8191);
-    alfa_indices = ((0:1023) >= long_fft(:,2)) & ((0:1023) <= long_fft(:,3));
-    alfa_indices = sum((1:69)*alfa_indices,1);
+    alpha_indices = ((0:1023) >= long_fft(:,2)) & ((0:1023) <= long_fft(:,3));
+    alpha_indices = sum((1:69)*alpha_indices,1);
     
     % Calculate audibility threshold for each frequency band
     P = zeros(69,1);
@@ -74,9 +74,9 @@ else
     sfc(2:end) = alpha_sf(2:69) - alpha_sf(1:68);
     while(max(abs(sfc(2:end)))<=60)
         % Quantize MDCT values 
-        S = sign(frameF) .* floor((abs(frameF).*2.^(-alpha_sf(alfa_indices)/4)).^(3/4) + MagicNumber);
+        S = sign(frameF) .* floor((abs(frameF).*2.^(-alpha_sf(alpha_indices)/4)).^(3/4) + MagicNumber);
         % Restore MDCT values from Quantized vector S
-        X_hat = sign(S) .* (abs(S).^(4/3)) .* 2.^(alpha_sf(alfa_indices)/4);
+        X_hat = sign(S) .* (abs(S).^(4/3)) .* 2.^(alpha_sf(alpha_indices)/4);
         % Calculate the error Power of each frequency band
         for n = 1:69
             P_e(n) = sum((frameF(long_fft(n,2)+1:long_fft(n,3)+1) -... 
@@ -92,7 +92,7 @@ else
     % The while loop's statement has ceased to apply. The last increase
     % transaction must be undone
     alpha_sf(inc,1) = alpha_sf(inc,1) - ones(sum(inc),1);
-    S = sign(frameF) .* floor((abs(frameF).*2.^(-alpha_sf(alfa_indices)/4)).^(3/4) + MagicNumber);
+    S = sign(frameF) .* floor((abs(frameF).*2.^(-alpha_sf(alpha_indices)/4)).^(3/4) + MagicNumber);
     sfc(1,1) = alpha_sf(1,1);
     sfc(2:end) = alpha_sf(2:69) - alpha_sf(1:68);
     G = alpha_sf(1,1);
