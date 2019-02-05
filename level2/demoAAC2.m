@@ -1,5 +1,5 @@
 function SNR = demoAAC2(fNameIn, fNameOut)
-    % Demonstrates the operation of an AAC encoder level 1
+    % Demonstrates the operation of an AAC encoder level 2
 
     audio = audioread(fNameIn);
 
@@ -11,11 +11,12 @@ function SNR = demoAAC2(fNameIn, fNameOut)
     decodedAudio = iAACoder2(AACSeq2, fNameOut);
     fprintf('Time elapsed for decoding of AAC Sequence is %f seconds\n',toc);
 
-    error = audio(1025:size(decodedAudio,1),:) - decodedAudio(1025:size(decodedAudio,1),:);
+    error = audio(1025:size(decodedAudio,1)-1024,:) - decodedAudio(1025:size(decodedAudio,1)-1024,:);
     %plot(error)
-    SNR_L = snr(audio(1025:size(decodedAudio,1)-1024,1),audio(1025:size(decodedAudio,1)-1024,1) - decodedAudio(1025:size(decodedAudio,1)-1024,1))
-    SNR_R = snr(audio(1025:size(decodedAudio,1)-1024,2),audio(1025:size(decodedAudio,1)-1024,2) - decodedAudio(1025:size(decodedAudio,1)-1024,2))
-    SNR = snr(audio(1025:size(decodedAudio,1)-1024,:),audio(1025:size(decodedAudio,1)-1024,:) - decodedAudio(1025:size(decodedAudio,1)-1024,:));
-
+    SNR_L = snr(audio(1025:size(decodedAudio,1)-1024,1),error(:,1));
+    SNR_R = snr(audio(1025:size(decodedAudio,1)-1024,2),error(:,2));
+    SNR = snr(audio(1025:size(decodedAudio,1)-1024,:),error);
+    fprintf('Left Channel SNR = %.4f dB\n',SNR_L);
+    fprintf('Left Channel SNR = %.4f dB\n',SNR_R);
     
 end

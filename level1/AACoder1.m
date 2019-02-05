@@ -34,7 +34,13 @@ for i = 2:sequence_lentgth - 1
     end
 end
 % Last element of sequence
-AACSeq1(sequence_lentgth).frameType = "OLS";
+if AACSeq1(sequence_lentgth-1).frameType == "ESH"
+    AACSeq1(sequence_lentgth).frameType = "LPS";
+elseif AACSeq1(sequence_lentgth-1).frameType == "LSS"
+    AACSeq1(sequence_lentgth).frameType = "ESH";
+else
+    AACSeq1(sequence_lentgth).frameType = "OLS";
+end
 AACSeq1(sequence_lentgth).winType = windowType;
 frameF = filterbank([framesLeft(:,sequence_lentgth) framesRight(:,sequence_lentgth)],"OLS", windowType);
 AACSeq1(sequence_lentgth).chl.frameF = frameF(:,1);

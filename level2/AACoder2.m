@@ -47,7 +47,13 @@ function AACSeq2 = AACoder2(fNameIn)
         
     end
     % Last element of sequence
-    AACSeq2(sequence_lentgth).frameType = "OLS";
+    if AACSeq2(sequence_lentgth-1).frameType == "ESH"
+        AACSeq2(sequence_lentgth).frameType = "LPS";
+    elseif AACSeq2(sequence_lentgth-1).frameType == "LSS"
+        AACSeq2(sequence_lentgth).frameType = "ESH";
+    else
+        AACSeq2(sequence_lentgth).frameType = "OLS";
+    end
     AACSeq2(sequence_lentgth).winType = windowType;
     frameF = filterbank([framesLeft(:,sequence_lentgth) framesRight(:,sequence_lentgth)],"OLS", windowType);
     [ frameFout, TNScoeffs ] = TNS(frameF(:,1), AACSeq2(sequence_lentgth).frameType);

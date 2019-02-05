@@ -98,22 +98,14 @@ function [ frameFout, TNScoeffs ] = TNS(frameFin, frameType)
         end
         
         %Return the positive values of a
-         TNScoeffs= -optimized_a_coef(2:5);
+        TNScoeffs= -optimized_a_coef(2:5);
     end         
 
 end
 
-% A simplified quantizer that quantizes in the larget value of every partition
+% A simplified quantizer that quantizes in the largest value of every partition
 function [quantized_value]= quanti(in_value)
 
-    for partition=-1.6:0.1:1.6
-        if (in_value<=partition)
-            quantized_value=partition;
-            break;
-        end
-    end
-    if (in_value>=1.6)
-        quantized_value=1.6;
-    end
+    quantized_value = max(min(floor((in_value-0.05)*10)/10,0.75),-0.75);
 
 end

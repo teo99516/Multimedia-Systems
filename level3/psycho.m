@@ -185,7 +185,7 @@ function SMR = psycho(frameT, frameType, frameTprev1, frameTprev2)
             npart(n) = max( nb(n), qthr_hat(n));
             
             %Calculate SMR
-            SMR(n) = energy(n)/npart(n);
+            SMR(n,1) = energy(n)/npart(n);
         end
         
     end
