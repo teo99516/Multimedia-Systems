@@ -105,7 +105,6 @@ end
 
 % A simplified quantizer that quantizes in the largest value of every partition
 function [quantized_value]= quanti(in_value)
-
-    quantized_value = max(min(floor((in_value-0.05)*10)/10,0.75),-0.75);
-
+    quantized_value = max(min(floor((in_value+0.1)*10)/10-0.05,0.75),-0.75); %16 quants
+    %quantized_value = max(min(floor((in_value+0.05)*10)/10,0.7),-0.7);      %15 quants
 end
