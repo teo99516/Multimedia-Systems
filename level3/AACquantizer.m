@@ -10,9 +10,9 @@ if (frameType =="ESH")
     sfc = zeros(42,8);
     G = zeros(8,1);
     % Scale factors initial values
-    alpha_sf = ones(42,8) * (16/3) * log2((max(frameF',2).^(3/4))/8191);
+    alpha_sf = ones(42,8) * (16/3) * (log2((max(frameF)'.^(3/4))/8191) * ones(1,8));
     alpha_indices = ((0:127) >= short_fft(:,2)) & ((0:127) <= short_fft(:,3));
-    alpha_indices = sum((1:42)*alpha_indices,1);
+    alpha_indices = sum((1:42)*alpha_indices,1)';
     
     for j = 1:8
         % Calculate audibility threshold for each frequency band
@@ -27,25 +27,29 @@ if (frameType =="ESH")
         sfc(2:end,j) = alpha_sf(2:42,j) - alpha_sf(1:41,j);
         while(max(abs(sfc(2:end,j)))<=60)
             % Quantize MDCT values 
-            frameFS(:,j) = sign(frameF(:,j)) .* floor((abs(frameF(:,j)).*2.^(-alpha_sf(alpha_indices)'/4)).^(3/4) + MagicNumber);
+            frameFS(:,j) = sign(frameF(:,j)) .* floor((abs(frameF(:,j)).*2.^(-alpha_sf(alpha_indices)/4)).^(3/4) + MagicNumber);
             % Restore MDCT values from Quantized vector S
-            frameFX_hat(:,j) = sign(frameFS(:,j)) .* (abs(frameFS(:,j)).^(4/3)) .* 2.^(alpha_sf(alpha_indices)'/4);
+            frameFX_hat(:,j) = sign(frameFS(:,j)) .* (abs(frameFS(:,j)).^(4/3)) .* 2.^(alpha_sf(alpha_indices)/4);
             % Calculate the error Power of each frequency band
             for n = 1:42
                 P_e(n) = sum((frameF(short_fft(n,2)+1:short_fft(n,3)+1,j) -... 
                               frameFX_hat(short_fft(n,2)+1:short_fft(n,3)+1,j)).^2);
             end
-            % Increase the scale factors of bands that have a error Power
-            % lower than the audibilty threshold
-            inc = P_e < T;
-            alpha_sf(inc,j) = alpha_sf(inc,j) + ones(sum(inc),1);
-            % Update sfc DPCM values
-            sfc(2:end,j) = alpha_sf(2:42,j) - alpha_sf(1:41,j);
+            if max(abs(sfc(2:end,j)))<=60
+                % Increase the scale factors of bands that have a error Power
+                % lower than the audibilty threshold
+                inc = P_e < T;
+                alpha_sf(inc,j) = alpha_sf(inc,j) + ones(sum(inc),1);
+                % Update sfc DPCM values
+                sfc(2:end,j) = alpha_sf(2:42,j) - alpha_sf(1:41,j);
+            else
+                break;
+            end
         end
         % The while loop's statement has ceased to apply. The last increase
         % transaction must be undone
         alpha_sf(inc,j) = alpha_sf(inc,j) - ones(sum(inc),1);
-        frameFS(:,j) = sign(frameF(:,j)) .* floor((abs(frameF(:,j)).*2.^(-alpha_sf(alpha_indices)'/4)).^(3/4) + MagicNumber);
+        frameFS(:,j) = sign(frameF(:,j)) .* floor((abs(frameF(:,j)).*2.^(-alpha_sf(alpha_indices)/4)).^(3/4) + MagicNumber);
         sfc(1,j) = alpha_sf(1,j);
         sfc(2:end,j) = alpha_sf(2:42,j) - alpha_sf(1:41,j);
         G(j,1) = alpha_sf(1,j);

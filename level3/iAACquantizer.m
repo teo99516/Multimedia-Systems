@@ -17,7 +17,7 @@ if (frameType =="ESH")
         end
         % Restore MDCT values from Quantized vector S
         currentSubframe = S((j-1)*128+(1:128),1);
-        frameF(:,j) = sign(currentSubframe) .* (abs(currentSubframe).^(4/3)) .* 2.^(alpha_sf(alpha_indices)'/4);
+        frameF(:,j) = sign(currentSubframe) .* (abs(currentSubframe).^(4/3)) .* 2.^(alpha_sf(alpha_indices)/4);
     end
 else
     % Initialize non ESH
@@ -33,7 +33,7 @@ else
         alpha_sf(n+1,1) = alpha_sf(n,1) + sfc(n,1);
     end
     % Restore MDCT values from Quantized vector S
-    frameF = sign(S) .* (abs(S).^(4/3)) .* 2.^(alpha_sf(alpha_indices)'/4);
+    frameF = sign(S) .* (abs(S).^(4/3)) .* 2.^(alpha_sf(alpha_indices)/4);
 end
 
 end
