@@ -7,7 +7,7 @@ function frameF = filterbank(frameT, frameType, winType)
     %a=4 for N=2048 and a=6 for N=256
     if( winType=="KBD")
         
-        w=kaiser(1024+1,4*pi); 
+        w=kaiser(1024+1,6*pi); 
 
         w_left_2048=zeros(1024,1);
         w_right_2048=zeros(1024,1);
@@ -17,7 +17,7 @@ function frameF = filterbank(frameT, frameType, winType)
            w_right_2048(1025-n)=sqrt( sum(w(1:n) )/sum(w(1:N/2+1)) ) ;
         end
         
-        w=kaiser(128+1,6*pi);
+        w=kaiser(128+1,4*pi);
         
         w_left_256=zeros(128,1);
         w_right_256=zeros(128,1);
