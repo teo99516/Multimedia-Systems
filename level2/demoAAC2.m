@@ -17,6 +17,6 @@ function SNR = demoAAC2(fNameIn, fNameOut)
     SNR_R = snr(audio(1025:size(decodedAudio,1)-1024,2),error(:,2));
     SNR = snr(audio(1025:size(decodedAudio,1)-1024,:),error);
     fprintf('Left Channel SNR = %.4f dB\n',SNR_L);
-    fprintf('Left Channel SNR = %.4f dB\n',SNR_R);
+    fprintf('Right Channel SNR = %.4f dB\n',SNR_R);
     
 end

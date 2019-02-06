@@ -21,7 +21,7 @@ function SMR = psycho(frameT, frameType, frameTprev1, frameTprev2)
         
         for j=1:8
             N=length(frameT(:,j) );
-            hann_256 = ( 0.5 - 0.5*cos(pi*((0:N-1)+0.5)/(N/2)) );
+            hann_256 = ( 0.5 - 0.5*cos(pi*((0:N-1)+0.5)/(N/2)) )';
             Sw_T = frameT(:,j) .* hann_256;   
             Sw_prev1 = prevFrames(:,j+1) .* hann_256; 
             Sw_prev2 = prevFrames(:,j) .* hann_256;
@@ -49,7 +49,7 @@ function SMR = psycho(frameT, frameType, frameTprev1, frameTprev2)
                 temp1= r_T(n)*cos(phase_T(n))-r_T_pred(n)*cos(phase_pred(n));
                 temp2= r_T(n)*sin(phase_T(n))- r_T_pred(n)*sin(phase_pred(n));
 
-                predictability(n)= sqrt( (temp1)^2 + (temp2)^2 )/( r_T(n) + abs(r_T_pred(n)) );
+                predictability(n,1)= sqrt( (temp1)^2 + (temp2)^2 )/( r_T(n) + abs(r_T_pred(n)) );
             end
             % Calculate energy and predictability for every band
             for i=1:42
@@ -143,20 +143,19 @@ function SMR = psycho(frameT, frameType, frameTprev1, frameTprev2)
             temp1= r_T(n)*cos(phase_T(n))-r_T_pred(n)*cos(phase_pred(n));
             temp2= r_T(n)*sin(phase_T(n))- r_T_pred(n)*sin(phase_pred(n));
             
-            predictability(n)= sqrt( (temp1)^2 + (temp2)^2 )/( r_T(n) + abs(r_T_pred(n)) );
+            predictability(n,1)= sqrt( (temp1)^2 + (temp2)^2 )/( r_T(n) + abs(r_T_pred(n)) );
         end
-        predictability = predictability(:);
 
         % Calculate energy and predictability for every band
         for i=1:69
-            energy(i)= sum( r_T(long_fft(i,2)+1:long_fft(i,3)+1 ).^2);
-            predictability_2(i)= sum (predictability(long_fft(i,2)+1:long_fft(i,3)+1 ).*r_T(long_fft(i,2)+1:long_fft(i,3)+1 ).^2 );
+            energy(i,1)= sum( r_T(long_fft(i,2)+1:long_fft(i,3)+1 ).^2);
+            predictability_2(i,1)= sum (predictability(long_fft(i,2)+1:long_fft(i,3)+1 ).*r_T(long_fft(i,2)+1:long_fft(i,3)+1 ).^2 );
         end
 
         % Combine energy and predictability 
         for n=1:69
-            ecb(n)= sum(energy(1:69)*long(1:69, n));
-            ct(n)= sum(predictability_2(1:69)*long(1:69, n));
+            ecb(n)= sum(energy(1:69).*long(1:69, n));
+            ct(n)= sum(predictability_2(1:69).*long(1:69, n));
 
             % Normalize predictability and energy 
             cb(n) = ct(n)/ecb(n);
@@ -195,7 +194,7 @@ end
 % Spreading function 
 function x = spreadingfun(i, j, temp_table)
     
-    if (i>=j)
+    if (temp_table(i,5)>=temp_table(j,5))
         tmpx = 3*(temp_table(j,5)- temp_table(i,5) );
     else
         tmpx = 1.5*(temp_table(j,5)- temp_table(i,5));
