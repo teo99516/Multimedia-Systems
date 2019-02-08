@@ -13,7 +13,7 @@ if (frameType =="ESH")
         % Restore alpha values from DPCM
         alpha_sf(1,1) = G(j,1);
         for n = 1:41
-            alpha_sf(n+1,1) = alpha_sf(n,1) + sfc(n,j);
+            alpha_sf(n+1,1) = alpha_sf(n,1) + sfc(n+1,j);
         end
         % Restore MDCT values from Quantized vector S
         currentSubframe = S((j-1)*128+(1:128),1);
@@ -30,7 +30,7 @@ else
     % Restore alpha values from DPCM
     alpha_sf(1,1) = G;
     for n = 1:68
-        alpha_sf(n+1,1) = alpha_sf(n,1) + sfc(n,1);
+        alpha_sf(n+1,1) = alpha_sf(n,1) + sfc(n+1,1);
     end
     % Restore MDCT values from Quantized vector S
     frameF = sign(S) .* (abs(S).^(4/3)) .* 2.^(alpha_sf(alpha_indices)/4);

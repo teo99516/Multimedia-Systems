@@ -10,7 +10,7 @@ if (frameType =="ESH")
     sfc = zeros(42,8);
     G = zeros(8,1);
     % Scale factors initial values
-    alpha_sf = ones(42,8) * (16/3) * (log2((max(frameF)'.^(3/4))/8191) * ones(1,8));
+    alpha_sf = ones(42,8) * (16/3) * (ones(8,1) * log2((max(frameF).^(3/4))/8191));
     alpha_indices = ((0:127) >= short_fft(:,2)) & ((0:127) <= short_fft(:,3));
     alpha_indices = sum((1:42)*alpha_indices,1)';
     
