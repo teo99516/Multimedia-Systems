@@ -1,13 +1,10 @@
 # Multimedia-Systems
 
-Function SSC
-
-Function filterbank
-- Improve KBD SNR
+Function demoAAC3
+- Calculate bitrate and compression
 
 Function TNS
-- Improve quantizer
-- Improve KBD SNR
+- Use quantizer indices instead of levels?
 
-Functions pcycho
-- Check functionality
+Function AACquantizer
+- Improve drum distortion
