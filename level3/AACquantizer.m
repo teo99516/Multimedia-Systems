@@ -7,7 +7,7 @@ if (frameType =="ESH")
     short_fft=table.B219b;
     frameFS = zeros(size(frameF));
     frameFX_hat = frameFS;
-    sfc = zeros(42,8);
+    sfc = zeros(41,8);
     G = zeros(8,1);
     % Scale factors initial values
     alpha_sf = ones(42,8) * (16/3) * (ones(8,1) * log2((max(frameF).^(3/4))/8191));
@@ -23,9 +23,8 @@ if (frameType =="ESH")
         end
         T = P ./ SMR(:,j);
         
-        % Initialize sfc for entry in while loop
-        sfc(2:end,j) = alpha_sf(2:42,j) - alpha_sf(1:41,j);
-        while(max(abs(sfc(2:end,j)))<=60)
+        % sfc(:,j) is already initialized with zeros()
+        while(max(abs(sfc(:,j)))<=60)
             % Quantize MDCT values 
             frameFS(:,j) = sign(frameF(:,j)) .* floor((abs(frameF(:,j)).*2.^(-alpha_sf(alpha_indices)/4)).^(3/4) + MagicNumber);
             % Restore MDCT values from Quantized vector S
@@ -35,23 +34,18 @@ if (frameType =="ESH")
                 P_e(n) = sum((frameF(short_fft(n,2)+1:short_fft(n,3)+1,j) -... 
                               frameFX_hat(short_fft(n,2)+1:short_fft(n,3)+1,j)).^2);
             end
-            if max(abs(sfc(2:end,j)))<=60
-                % Increase the scale factors of bands that have a error Power
-                % lower than the audibilty threshold
-                inc = P_e < T;
-                alpha_sf(inc,j) = alpha_sf(inc,j) + ones(sum(inc),1);
-                % Update sfc DPCM values
-                sfc(2:end,j) = alpha_sf(2:42,j) - alpha_sf(1:41,j);
-            else
-                break;
-            end
+            % Increase the scale factors of bands that have a error Power
+            % lower than the audibilty threshold
+            inc = P_e < T;
+            alpha_sf(inc,j) = alpha_sf(inc,j) + ones(sum(inc),1);
+            % Update sfc DPCM values
+            sfc(:,j) = alpha_sf(2:42,j) - alpha_sf(1:41,j);
         end
         % The while loop's statement has ceased to apply. The last increase
         % transaction must be undone
         alpha_sf(inc,j) = alpha_sf(inc,j) - ones(sum(inc),1);
         frameFS(:,j) = sign(frameF(:,j)) .* floor((abs(frameF(:,j)).*2.^(-alpha_sf(alpha_indices)/4)).^(3/4) + MagicNumber);
-        sfc(1,j) = alpha_sf(1,j);
-        sfc(2:end,j) = alpha_sf(2:42,j) - alpha_sf(1:41,j);
+        sfc(:,j) = alpha_sf(2:42,j) - alpha_sf(1:41,j);
         G(j,1) = alpha_sf(1,j);
         % Store subframe S values in the full vector
         S((j-1)*128+(1:128),1) = frameFS(:,j);
@@ -59,8 +53,6 @@ if (frameType =="ESH")
 else
     % Initialize non ESH
     long_fft=table.B219a;
-    X_hat = S;
-    sfc = zeros(69,1);
     % Scale factors initial values
     alpha_sf = ones(69,1) * (16/3) * log2((max(frameF)^(3/4))/8191);
     alpha_indices = ((0:1023) >= long_fft(:,2)) & ((0:1023) <= long_fft(:,3));
@@ -75,8 +67,8 @@ else
     T = P ./ SMR;
     
     % Initialize sfc for entry in while loop
-    sfc(2:end) = alpha_sf(2:69) - alpha_sf(1:68);
-    while(max(abs(sfc(2:end)))<=60)
+    sfc = 0;
+    while(max(abs(sfc))<=60)
         % Quantize MDCT values 
         S = sign(frameF) .* floor((abs(frameF).*2.^(-alpha_sf(alpha_indices)/4)).^(3/4) + MagicNumber);
         % Restore MDCT values from Quantized vector S
@@ -91,14 +83,13 @@ else
         inc = P_e < T;
         alpha_sf(inc,1) = alpha_sf(inc,1) + ones(sum(inc),1);
         % Update sfc DPCM values
-        sfc(2:end) = alpha_sf(2:69) - alpha_sf(1:68);
+        sfc = alpha_sf(2:69) - alpha_sf(1:68);
     end
     % The while loop's statement has ceased to apply. The last increase
     % transaction must be undone
     alpha_sf(inc,1) = alpha_sf(inc,1) - ones(sum(inc),1);
     S = sign(frameF) .* floor((abs(frameF).*2.^(-alpha_sf(alpha_indices)/4)).^(3/4) + MagicNumber);
-    sfc(1,1) = alpha_sf(1,1);
-    sfc(2:end) = alpha_sf(2:69) - alpha_sf(1:68);
+    sfc = alpha_sf(2:69) - alpha_sf(1:68);
     G = alpha_sf(1,1);
 end
 

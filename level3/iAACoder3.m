@@ -1,14 +1,19 @@
 function x = iAACoder3(AACSeq3, fNameOut)
     %Returns decoded
-
-    sequence_lentgth = length(AACSeq3);
-    xi = zeros(sequence_lentgth*1024,2);
-    for i = 1:sequence_lentgth-1
-        % TODO Huffman decode
-        streamL = AACSeq3(i).chl.stream;
-        sfcL = AACSeq3(i).chl.sfc;
-        streamR = AACSeq3(i).chr.stream;
-        sfcR = AACSeq3(i).chr.sfc;
+    huffLUT = loadLUT();
+    forceCodebook = 12;
+    sequence_length = length(AACSeq3);
+    xi = zeros(sequence_length*1024,2);
+    for i = 1:sequence_length-1
+        
+        streamL = decodeHuff(AACSeq3(i).chl.stream, AACSeq3(i).chl.codebook, huffLUT);
+        sfcL = decodeHuff(AACSeq3(i).chl.sfc, forceCodebook, huffLUT);
+        streamR = decodeHuff(AACSeq3(i).chr.stream, AACSeq3(i).chr.codebook, huffLUT);
+        sfcR = decodeHuff(AACSeq3(i).chr.sfc, forceCodebook, huffLUT);
+        if (AACSeq3(i).frameType == "ESH")
+            sfcL = reshape(sfcL,41,8);
+            sfcR = reshape(sfcR,41,8);
+        end
         frameFL = iAACquantizer(streamL, sfcL, AACSeq3(i).chl.G, AACSeq3(i).frameType);
         frameFR = iAACquantizer(streamR, sfcR, AACSeq3(i).chr.G, AACSeq3(i).frameType);
         if (AACSeq3(i).frameType == "ESH")
