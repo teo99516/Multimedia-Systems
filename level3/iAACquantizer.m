@@ -1,6 +1,5 @@
 function frameF = iAACquantizer(S, sfc, G, frameType)
 table=load('TableB219.mat');
-sfc = sfc';
 S = S';
 if (frameType =="ESH")
     % Initialize ESH

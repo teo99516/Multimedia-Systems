@@ -7,9 +7,9 @@ function x = iAACoder3(AACSeq3, fNameOut)
     for i = 1:sequence_length-1
         
         streamL = decodeHuff(AACSeq3(i).chl.stream, AACSeq3(i).chl.codebook, huffLUT);
-        sfcL = decodeHuff(AACSeq3(i).chl.sfc, forceCodebook, huffLUT);
+        sfcL = decodeHuff(AACSeq3(i).chl.sfc, forceCodebook, huffLUT)';
         streamR = decodeHuff(AACSeq3(i).chr.stream, AACSeq3(i).chr.codebook, huffLUT);
-        sfcR = decodeHuff(AACSeq3(i).chr.sfc, forceCodebook, huffLUT);
+        sfcR = decodeHuff(AACSeq3(i).chr.sfc, forceCodebook, huffLUT)';
         if (AACSeq3(i).frameType == "ESH")
             sfcL = reshape(sfcL,41,8);
             sfcR = reshape(sfcR,41,8);

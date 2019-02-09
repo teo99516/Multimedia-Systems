@@ -1,15 +1,18 @@
 function SMR = psycho(frameT, frameType, frameTprev1, frameTprev2)
-
+    persistent short long
     % SMR 42X8 for ESH, else 69X1
 
     table=load('TableB219.mat');
     if(frameType=='ESH')
-        short=zeros(42,42);
+        
         short_fft=table.B219b;
         % Calculate spreadingfunction for all band combinations of ESH frames
-        for i = 1:42
-            for j = 1:42
-                short(i,j) = spreadingfun(i, j, short_fft);
+        if isempty(short)
+            short=zeros(42,42);
+            for i = 1:42
+                for j = 1:42
+                    short(i,j) = spreadingfun(i, j, short_fft);
+                end
             end
         end
         frameT = buffer(frameT(449:1600),256,128,'nodelay');
@@ -84,7 +87,7 @@ function SMR = psycho(frameT, frameType, frameTprev1, frameTprev2)
                 nb(n) = en(n)*bc(n);
 
                 %Pre-echo control
-                qthr_hat(n) = eps((N/2)*10^(short_fft(n,6)/10));
+                qthr_hat(n) = eps()*(N/2)*10^(short_fft(n,6)/10);
                 npart(n) = max( nb(n), qthr_hat(n));
 
                 %Calculate SMR
@@ -94,13 +97,14 @@ function SMR = psycho(frameT, frameType, frameTprev1, frameTprev2)
         end
         
     else
-
-        long = zeros(69,69);
         long_fft=table.B219a;
         % Calculate spreadingfunction for all band combinations of non-ESH frames
-        for i =1:69
-            for j=1:69
-                long(i,j) = spreadingfun(i, j, long_fft);
+        if isempty(long)
+            long = zeros(69,69);
+            for i =1:69
+                for j=1:69
+                    long(i,j) = spreadingfun(i, j, long_fft);
+                end
             end
         end
 
@@ -180,7 +184,7 @@ function SMR = psycho(frameT, frameType, frameTprev1, frameTprev2)
             nb(n) = en(n)*bc(n);
             
             %Pre-echo control
-            qthr_hat(n) = eps((N/2)*10^(long_fft(n,6)/10));
+            qthr_hat(n) = eps()*(N/2)*10^(long_fft(n,6)/10);
             npart(n) = max( nb(n), qthr_hat(n));
             
             %Calculate SMR

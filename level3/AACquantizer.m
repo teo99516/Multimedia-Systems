@@ -19,12 +19,13 @@ if (frameType =="ESH")
         P = zeros(42,1);
         P_e = P;
         for n = 1:42
-            P(n) = sum(frameF(short_fft(n,2)+1:short_fft(n,3)+1,j).^2);
+            P(n,1) = sum(frameF(short_fft(n,2)+1:short_fft(n,3)+1,j).^2);
         end
         T = P ./ SMR(:,j);
         
-        % sfc(:,j) is already initialized with zeros()
-        while(max(abs(sfc(:,j)))<=60)
+        % Initialize logical array inc. sfc(:,j) is already initialized with zeros()
+        inc = 1 == 1;
+        while(max(abs(sfc(:,j)))<=60 && any(inc))
             % Quantize MDCT values 
             frameFS(:,j) = sign(frameF(:,j)) .* floor((abs(frameF(:,j)).*2.^(-alpha_sf(alpha_indices)/4)).^(3/4) + MagicNumber);
             % Restore MDCT values from Quantized vector S
@@ -62,13 +63,14 @@ else
     P = zeros(69,1);
     P_e = P;
     for n = 1:69
-        P(n) = sum(frameF(long_fft(n,2)+1:long_fft(n,3)+1).^2);
+        P(n,1) = sum(frameF(long_fft(n,2)+1:long_fft(n,3)+1).^2);
     end
     T = P ./ SMR;
     
-    % Initialize sfc for entry in while loop
+    % Initialize sfc for entry in while loop and logical array inc
     sfc = 0;
-    while(max(abs(sfc))<=60)
+    inc = 1 == 1;
+    while(max(abs(sfc))<=60 && any(inc))
         % Quantize MDCT values 
         S = sign(frameF) .* floor((abs(frameF).*2.^(-alpha_sf(alpha_indices)/4)).^(3/4) + MagicNumber);
         % Restore MDCT values from Quantized vector S
