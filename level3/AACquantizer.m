@@ -13,13 +13,14 @@ if (frameType =="ESH")
     alpha_sf = ones(42,8) * (16/3) * (ones(8,1) * log2((max(frameF).^(3/4))/8191));
     alpha_indices = ((0:127) >= short_fft(:,2)) & ((0:127) <= short_fft(:,3));
     alpha_indices = sum((1:42)*alpha_indices,1)';
-    
+    bandStart = short_fft(:,2)+1;
+    bandEnd = short_fft(:,3)+1;
     for j = 1:8
         % Calculate audibility threshold for each frequency band
         P = zeros(42,1);
         P_e = P;
         for n = 1:42
-            P(n,1) = sum(frameF(short_fft(n,2)+1:short_fft(n,3)+1,j).^2);
+            P(n,1) = sum(frameF(bandStart(n):bandEnd(n),j).^2);
         end
         T = P ./ SMR(:,j);
         
@@ -32,8 +33,8 @@ if (frameType =="ESH")
             frameFX_hat(:,j) = sign(frameFS(:,j)) .* (abs(frameFS(:,j)).^(4/3)) .* 2.^(alpha_sf(alpha_indices)/4);
             % Calculate the error Power of each frequency band
             for n = 1:42
-                P_e(n) = sum((frameF(short_fft(n,2)+1:short_fft(n,3)+1,j) -... 
-                              frameFX_hat(short_fft(n,2)+1:short_fft(n,3)+1,j)).^2);
+                P_e(n) = sum((frameF(bandStart(n):bandEnd(n),j) -... 
+                              frameFX_hat(bandStart(n):bandEnd(n),j)).^2);
             end
             % Increase the scale factors of bands that have a error Power
             % lower than the audibilty threshold
@@ -58,12 +59,13 @@ else
     alpha_sf = ones(69,1) * (16/3) * log2((max(frameF)^(3/4))/8191);
     alpha_indices = ((0:1023) >= long_fft(:,2)) & ((0:1023) <= long_fft(:,3));
     alpha_indices = sum((1:69)*alpha_indices,1);
-    
+    bandStart = long_fft(:,2)+1;
+    bandEnd = long_fft(:,3)+1;
     % Calculate audibility threshold for each frequency band
     P = zeros(69,1);
     P_e = P;
     for n = 1:69
-        P(n,1) = sum(frameF(long_fft(n,2)+1:long_fft(n,3)+1).^2);
+        P(n,1) = sum(frameF(bandStart(n):bandEnd(n)).^2);
     end
     T = P ./ SMR;
     
@@ -77,8 +79,8 @@ else
         X_hat = sign(S) .* (abs(S).^(4/3)) .* 2.^(alpha_sf(alpha_indices)/4);
         % Calculate the error Power of each frequency band
         for n = 1:69
-            P_e(n) = sum((frameF(long_fft(n,2)+1:long_fft(n,3)+1) -... 
-                          X_hat(long_fft(n,2)+1:long_fft(n,3)+1)).^2);
+            P_e(n) = sum((frameF(bandStart(n):bandEnd(n)) -... 
+                          X_hat(bandStart(n):bandEnd(n))).^2);
         end
         % Increase the scale factors of bands that have a error Power
         % lower than the audibilty threshold

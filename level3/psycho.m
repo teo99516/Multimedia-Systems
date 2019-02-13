@@ -16,11 +16,7 @@ function SMR = psycho(frameT, frameType, frameTprev1, frameTprev2)
             end
         end
         frameT = buffer(frameT(449:1600),256,128,'nodelay');
-        if(size(frameTprev1,2)>1)
-            prevFrames = [frameTprev1(:,7:8) frameT(:,1:7)];
-        else
-            prevFrames = [frameTprev1(1217:1472) frameTprev1(1345:1600) frameT(:,1:7)];
-        end
+        prevFrames = [frameTprev1(1217:1472) frameTprev1(1345:1600) frameT(:,1:7)];
         
         for j=1:8
             N=length(frameT(:,j) );
