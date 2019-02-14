@@ -3,8 +3,8 @@ function x = iAACoder3(AACSeq3, fNameOut)
     huffLUT = loadLUT();
     forceCodebook = 12;
     sequence_length = length(AACSeq3);
-    xi = zeros(sequence_length*1024,2);
-    for i = 1:sequence_length-1
+    xi = zeros((sequence_length+1)*1024,2);
+    for i = 1:sequence_length
         
         streamL = decodeHuff(AACSeq3(i).chl.stream, AACSeq3(i).chl.codebook, huffLUT);
         sfcL = decodeHuff(AACSeq3(i).chl.sfc, forceCodebook, huffLUT)';
@@ -31,7 +31,7 @@ function x = iAACoder3(AACSeq3, fNameOut)
     end
 
     % Write audio sequence to a file using 48 KHz
-    audiowrite(fNameOut,xi,48000);
+    audiowrite(fNameOut,xi(1025:end-1024,:),48000);
 
     if(nargout==1)
         x = xi;

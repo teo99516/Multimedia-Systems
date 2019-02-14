@@ -3,8 +3,8 @@ function x = iAACoder2(AACSeq2, fNameOut)
     %Returns decoded
 
     sequence_lentgth = length(AACSeq2);
-    xi = zeros(sequence_lentgth*1024,2);
-    for i = 1:sequence_lentgth - 1
+    xi = zeros((sequence_lentgth+1)*1024,2);
+    for i = 1:sequence_lentgth
         if (AACSeq2(i).frameType == "ESH")
             frameF=zeros(128,8,2);
             frameF(:,:,1) = iTNS(AACSeq2(i).chl.frameF , AACSeq2(i).frameType, AACSeq2(i).chl.TNScoeffs );
@@ -22,7 +22,7 @@ function x = iAACoder2(AACSeq2, fNameOut)
     end
 
     % Write audio sequence to a file using 48 KHz
-    audiowrite(fNameOut,xi,48000);
+    audiowrite(fNameOut,xi(1025:end-1024,:),48000);
 
     if(nargout==1)
         x = xi;

@@ -6,8 +6,8 @@ function AACSeq3 = AACoder3(fNameIn, fnameAACoded)
     forceCodebook = 12;
     audio = audioread(fNameIn);
     % Buffer the audio array using 2048 sample windows with 50 % overlap
-    framesLeft = buffer(audio(:,1), 2048, 1024, 'nodelay');
-    framesRight = buffer(audio(:,2), 2048, 1024, 'nodelay');
+    framesLeft = buffer([zeros(1024,1);audio(:,1);zeros(1024,1)], 2048, 1024, 'nodelay');
+    framesRight = buffer([zeros(1024,1);audio(:,2);zeros(1024,1)], 2048, 1024, 'nodelay');
     
     sequence_length = size(framesLeft,2);
     % Use 1 full window (2048 samples) at the start of sequence  so that the
