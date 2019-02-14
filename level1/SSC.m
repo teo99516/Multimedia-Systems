@@ -5,7 +5,7 @@ function frameType = SSC(frameT, nextFrameT, prevFrameType)
     NextFrameFiltered = zeros(size(nextFrameT));
     NextFrameFiltered(1,:) = 0.7548*nextFrameT(1,:);  
     for i = 2:size(nextFrameT,1) 
-        NextFrameFiltered(i,:)=0.7458*(nextFrameT(i,:)-nextFrameT(i-1,:))+ 0.5095*NextFrameFiltered(i-1,:);
+        NextFrameFiltered(i,:)=0.7548*(nextFrameT(i,:)-nextFrameT(i-1,:))+ 0.5095*NextFrameFiltered(i-1,:);
     end
 
     %Calculate the squared sum of the 128 values
