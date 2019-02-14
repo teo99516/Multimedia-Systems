@@ -73,6 +73,7 @@ end
 function T = audibilityThr(frameF, frameType, SMR,  table)
 if (frameType =="ESH")
     short_fft=table.B219b;
+    T = zeros(42,8);
     for j = 1:8
         % Calculate audibility threshold for each frequency band of the
         % current subframe
@@ -80,7 +81,7 @@ if (frameType =="ESH")
         for n = 1:42
             P(n) = sum(frameF(short_fft(n,2)+1:short_fft(n,3)+1,j).^2);
         end
-        T = P ./ SMR(:,j);
+        T(:,j) = P ./ SMR(:,j);
     end
 else
     long_fft=table.B219a;
