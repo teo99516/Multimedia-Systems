@@ -17,6 +17,7 @@ plot(error);
 title('Input-Decoded Signal Error')
 xlabel('Sample #');
 ylabel('Error');
+legend('Left Channel','Right Channel');
 SNR_L = snr(audio(:,1),error(:,1));
 SNR_R = snr(audio(:,2),error(:,2));
 SNR = snr(audio, error);

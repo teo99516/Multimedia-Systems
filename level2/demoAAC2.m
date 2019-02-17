@@ -1,14 +1,6 @@
 function SNR = demoAAC2(fNameIn, fNameOut)
 % Demonstrates the operation of an AAC encoder using components of
 % level 2 and level 1
-% Inputs:
-%     fNameIn   :   String that contains the name of the audio file that is
-%                   about to be encoded according to AAC
-%     fNameOut  :   String containing the name of the file that the Decoded
-%                   audio signal will be saved into
-% Output:
-%     SNR       :   Signal to Noise Ratio between Input & Decoded
-%                   audio signal in dB
 
 audio = audioread(fNameIn);
 
@@ -28,6 +20,7 @@ plot(error);
 title('Input-Decoded Signal Error')
 xlabel('Sample #');
 ylabel('Error');
+legend('Left Channel','Right Channel');
 SNR_L = snr(audio(:,1),error(:,1));
 SNR_R = snr(audio(:,2),error(:,2));
 SNR = snr(audio,error);

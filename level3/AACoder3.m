@@ -11,7 +11,7 @@ function AACSeq3 = AACoder3(fNameIn, fnameAACoded)
     
     sequence_length = size(framesLeft,2);
     % Use 1 full window (2048 samples) at the start of sequence  so that the
-    % function of psychoacoustic model can be called to predict the first window 
+    % function of psychoacoustic model can be called to predict the first window
     framesLeft = [zeros(2048,1) [zeros(1024,1);framesLeft(1:1024,1)] framesLeft];
     framesRight = [zeros(2048,1) [zeros(1024,1);framesRight(1:1024,1)] framesRight];
     

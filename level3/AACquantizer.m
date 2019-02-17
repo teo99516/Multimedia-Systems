@@ -24,14 +24,14 @@ if (frameType =="ESH")
         end
         T = P ./ SMR(:,j);
         
-        alpha_band = ones(42,1) * maxVals(j);
+        alpha_sf = ones(42,1) * maxVals(j);
         % Initialize logical array inc. sfc(:,j) is already initialized with zeros()
         inc = 1 == 1;
         while(max(abs(sfc(:,j)))<=60 && any(inc))
             % Quantize MDCT values 
-            frameFS(:,j) = sign(frameF(:,j)) .* floor((abs(frameF(:,j)).*2.^(-alpha_band(alpha_indices)/4)).^(3/4) + MagicNumber);
+            frameFS(:,j) = sign(frameF(:,j)) .* floor((abs(frameF(:,j)).*2.^(-alpha_sf(alpha_indices)/4)).^(3/4) + MagicNumber);
             % Restore MDCT values from Quantized vector S
-            frameFX_hat(:,j) = sign(frameFS(:,j)) .* (abs(frameFS(:,j)).^(4/3)) .* 2.^(alpha_band(alpha_indices)/4);
+            frameFX_hat(:,j) = sign(frameFS(:,j)) .* (abs(frameFS(:,j)).^(4/3)) .* 2.^(alpha_sf(alpha_indices)/4);
             % Calculate the error Power of each frequency band
             for n = 1:42
                 P_e(n) = sum((frameF(bandStart(n):bandEnd(n),j) -... 
@@ -40,16 +40,16 @@ if (frameType =="ESH")
             % Increase the scale factors of bands that have a error Power
             % lower than the audibilty threshold
             inc = P_e < T;
-            alpha_band(inc) = alpha_band(inc) + ones(sum(inc),1);
+            alpha_sf(inc) = alpha_sf(inc) + ones(sum(inc),1);
             % Update sfc DPCM values
-            sfc(:,j) = alpha_band(2:42) - alpha_band(1:41);
+            sfc(:,j) = alpha_sf(2:42) - alpha_sf(1:41);
         end
-        % The while loop's statement has ceased to apply. The last increase
-        % transaction must be undone
-        alpha_band(inc) = alpha_band(inc) - ones(sum(inc),1);
-        frameFS(:,j) = sign(frameF(:,j)) .* floor((abs(frameF(:,j)).*2.^(-alpha_band(alpha_indices)/4)).^(3/4) + MagicNumber);
-        sfc(:,j) = alpha_band(2:42) - alpha_band(1:41);
-        G(j,1) = alpha_band(1);
+        if max(abs(sfc(:,j)))>60
+            alpha_sf(inc) = alpha_sf(inc) - ones(sum(inc),1);
+            frameFS(:,j) = sign(frameF(:,j)) .* floor((abs(frameF(:,j)).*2.^(-alpha_sf(alpha_indices)/4)).^(3/4) + MagicNumber);
+            sfc(:,j) = alpha_sf(2:42) - alpha_sf(1:41);
+        end
+        G(j,1) = alpha_sf(1);
         % Store subframe S values in the full vector
         S((j-1)*128+(1:128),1) = frameFS(:,j);
     end
@@ -90,11 +90,12 @@ else
         % Update sfc DPCM values
         sfc = alpha_sf(2:69) - alpha_sf(1:68);
     end
-    % The while loop's statement has ceased to apply. The last increase
-    % transaction must be undone
-    alpha_sf(inc,1) = alpha_sf(inc,1) - ones(sum(inc),1);
-    S = sign(frameF) .* floor((abs(frameF).*2.^(-alpha_sf(alpha_indices)/4)).^(3/4) + MagicNumber);
-    sfc = alpha_sf(2:69) - alpha_sf(1:68);
+    
+    if max(abs(sfc))>60
+        alpha_sf(inc,1) = alpha_sf(inc,1) - ones(sum(inc),1);
+        S = sign(frameF) .* floor((abs(frameF).*2.^(-alpha_sf(alpha_indices)/4)).^(3/4) + MagicNumber);
+        sfc = alpha_sf(2:69) - alpha_sf(1:68);
+    end
     G = alpha_sf(1,1);
 end
 

@@ -63,7 +63,7 @@ function SMR = psycho(frameT, frameType, frameTprev1, frameTprev2)
                 energy(i)= sum( r_T(short_fft(i,2)+1:short_fft(i,3)+1 ).^2);
                 predictability_2(i)= sum (predictability(short_fft(i,2)+1:short_fft(i,3)+1 ).*(r_T(short_fft(i,2)+1:short_fft(i,3)+1 ).^2) );
             end
-            % Combine energy and predictability 
+            % 6.Combine energy and predictability 
             for n=1:42
                 ecb(n)= energy'*short(:, n);
                 ct(n)= predictability_2'*short(:, n);
@@ -72,7 +72,7 @@ function SMR = psycho(frameT, frameType, frameTprev1, frameTprev2)
                 cb(n) = ct(n)/ecb(n);
                 en(n) = ecb(n)/ sum(short(:, n) );
 
-                % Calculate tonality index( values in (0,1) )
+                % 7.Calculate tonality index( values in (0,1) )
                 tb(n) = max(min(-0.299 -0.43 *log(cb(n)),0.999999999),0.0000000001);
 
                 % Noise Masking Tone( in dB)
@@ -81,20 +81,20 @@ function SMR = psycho(frameT, frameType, frameTprev1, frameTprev2)
                 % Tone Masking Noise( in dB)
                 TMN(n) = 18;
 
-                %SNR
+                % 8.SNR
                 SNR(n) = tb(n)*TMN(n) + (1 - tb(n))*NMT(n);
 
-                % Convert from to Db to energy
+                % 9.Convert from to dB to energy
                 bc(n) = 10^(- SNR(n)/10);
 
-                %Energy threshold
+                % 10.Energy threshold
                 nb(n) = en(n)*bc(n);
 
-                %Pre-echo control
+                % 11.Pre-echo control
                 qthr_hat(n) = eps()*(N/2)*10^(short_fft(n,6)/10);
                 npart(n) = max( nb(n), qthr_hat(n));
 
-                %Calculate SMR
+                % 12.Calculate SMR
                 SMR(n,j) = energy(n)/npart(n);
             end
             
@@ -203,7 +203,7 @@ end
 % Spreading function 
 function x = spreadingfun(i, j, temp_table)
     
-    if (temp_table(i,5)>=temp_table(j,5))
+    if i >= j
         tmpx = 3*(temp_table(j,5)- temp_table(i,5) );
     else
         tmpx = 1.5*(temp_table(j,5)- temp_table(i,5));

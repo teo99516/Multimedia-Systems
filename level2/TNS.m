@@ -7,11 +7,11 @@ function [ frameFout, TNScoeffs ] = TNS(frameFin, frameType)
     table=load('TableB219.mat');
     long_fft=table.B219a;
     short_fft=table.B219b;
-    steady=1;
     %Calculate normalization coefficiences according to Table B219a
     if frameType=="ESH"
         %Calculate 42 values of band energies for every subframe
         normalization_coef=zeros(128,8);
+        TNScoeffs = zeros(4,8);
         frameFout=zeros(128,8);
         for j=1:8
             for i=1:42
@@ -50,8 +50,8 @@ function [ frameFout, TNScoeffs ] = TNS(frameFin, frameType)
             %Apply FIR filter
             frameFout(:,j)=filter(optimized_a_coef,1,frameFin(:,j));
             flag_stable=isstable([1],optimized_a_coef);
-            if flag_stable==0
-                steady=0;
+            if ~flag_stable
+                warning('Unstable TNS Coefficients filter');
             end
             
             %Return the positive values of a
@@ -109,6 +109,7 @@ function [quantized_value]= quanti(in_value)
     % Create the quantizer functon
     % in_value = -0.9:0.0001:0.9;
     % quantized_value = max(min(floor((in_value+0.1)*10)/10-0.05,0.75),-0.75);
+    % figure
     % plot([in_value NaN zeros(1,length(in_value))],[zeros(1,length(in_value)) NaN in_value],'color','black')
     % hold on;
     % for i = -0.7:0.1:0.7
