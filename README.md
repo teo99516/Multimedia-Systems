@@ -1,10 +1,3 @@
 # Multimedia-Systems
 
-Function demoAAC3
-- Calculate bitrate and compression
-
-Function TNS
-- Use quantizer indices instead of levels?
-
-Function AACquantizer
-- Improve drum distortion
+demoFull is suggested for a full demonstration of the AAC encoder
