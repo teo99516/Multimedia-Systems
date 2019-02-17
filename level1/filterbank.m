@@ -1,52 +1,60 @@
 function frameF = filterbank(frameT, frameType, winType)
-%winType: 
+    %winType: 
     %-KBN
     %-SIN
     N=length(frameT(:,1));
     %Kaiser windows
-    %a=4 for N=2048 and a=6 for N=256
-    if( winType=="KBD")
-        
-        w=kaiser(1024+1,6*pi); 
-
-        w_left_2048=zeros(1024,1);
-        w_right_2048=zeros(1024,1);
-        for n=1:(N/2)
-            %Left an right KBN windows (w-left is the inverse of w_right)
-           w_left_2048(n)=sqrt( sum(w(1:n) )/sum(w(1:N/2+1)) ) ;
-           w_right_2048(1025-n)=sqrt( sum(w(1:n) )/sum(w(1:N/2+1)) ) ;
-        end
-        
-        w=kaiser(128+1,4*pi);
-        
-        w_left_256=zeros(128,1);
-        w_right_256=zeros(128,1);
-        for n=1:(256/2)
-            %Left an right KBN windows (w-left is the inverse of w_right)
-           w_left_256(n)=sqrt( sum(w(1:n) )/sum(w(1:128+1)) ) ;
-           w_right_256(129-n)=sqrt( sum(w(1:n) )/sum(w(1:128+1)) ) ;
-        end
+    %a=6 for N=2048 and a=4 for N=256
+    persistent w_left_2048 w_right_2048 w_left_256 w_right_256 wPersistent
+    flag = false;
+    if isempty(wPersistent)
+        wPersistent = winType;
     else
-        %Sinusoid windows
-        w_left_2048=zeros(1024,1);
-        w_right_2048=zeros(1024,1);
-        for n=1:2048
-            if(n<=1024)
-                w_left_2048(n)= sin( (pi/N)*(n-1+1/2)  );
-            else
-                w_right_2048(n-N/2)=sin( (pi/N)*(n-1+1/2)  );
+        flag = wPersistent ~= winType;
+    end
+    if isempty(w_left_2048) || flag
+        if (winType=="KBD")
+            w=kaiser(1024+1,6*pi);
+            w_left_2048=zeros(1024,1);
+            w_right_2048=zeros(1024,1);
+            for n=1:(N/2)
+                %Left an right KBN windows (w-left is the inverse of w_right)
+               w_left_2048(n)=sqrt( sum(w(1:n) )/sum(w(1:N/2+1)) ) ;
+               w_right_2048(1025-n)=sqrt( sum(w(1:n) )/sum(w(1:N/2+1)) ) ;
             end
-        end 
-        w_left_256=zeros(128,1);
-        w_right_256=zeros(128,1);
-         for n=1:256
-             if(n<=128)
-                w_left_256(n)= sin( (pi/256)*(n-1+1/2)  );
-            else
-                w_right_256(n-128)=sin( (pi/256)*(n-1+1/2)  );
+            
+            w=kaiser(128+1,4*pi);
+            w_left_256=zeros(128,1);
+            w_right_256=zeros(128,1);
+            for n=1:(256/2)
+                %Left an right KBN windows (w-left is the inverse of w_right)
+               w_left_256(n)=sqrt( sum(w(1:n) )/sum(w(1:128+1)) ) ;
+               w_right_256(129-n)=sqrt( sum(w(1:n) )/sum(w(1:128+1)) ) ;
             end
-         end
+        
+        else
+            %Sinusoid windows
+            w_left_2048=zeros(1024,1);
+            w_right_2048=zeros(1024,1);
+            for n=1:2048
+                if(n<=1024)
+                    w_left_2048(n)= sin( (pi/N)*(n-1+1/2)  );
+                else
+                    w_right_2048(n-N/2)=sin( (pi/N)*(n-1+1/2)  );
+                end
+            end 
+            w_left_256=zeros(128,1);
+            w_right_256=zeros(128,1);
+             for n=1:256
+                 if(n<=128)
+                    w_left_256(n)= sin( (pi/256)*(n-1+1/2)  );
+                else
+                    w_right_256(n-128)=sin( (pi/256)*(n-1+1/2)  );
+                end
+             end
         %disp( length(w_left_2048) );
+        end
+        wPersistent = winType;
     end
     
     
@@ -95,7 +103,6 @@ function frameF = filterbank(frameT, frameType, winType)
     %     k = 0:N/2-1;
     %     frameF = 2 * sum(frameT .* cos((2 * pi * ( n + (N/2 + 1)/2 ) / N)' * k + 1/2))';
     end
-    
 end
 
 function y = mdct4(x)

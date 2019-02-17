@@ -1,7 +1,6 @@
 function frameT = iFilterbank(frameF, frameType, winType)
-% Returns iMDCT transformed input frameF 1024x2 as frameT
-%
-
+% Returns iMDCT transformed input frameF 1024x2 or 128x8 for ESH as frameT
+    
     if (frameType == "ESH")
         frames(:,:,1) = imdct4(frameF(:,:,1));
         frames(:,:,2) = imdct4(frameF(:,:,2));
@@ -11,50 +10,61 @@ function frameT = iFilterbank(frameF, frameType, winType)
     end
     
     N = 2048;
-    if( winType=="KBD")
-        
-        w=kaiser(1024+1,6*pi); 
-
-        w_left_2048=zeros(1024,1);
-        w_right_2048=zeros(1024,1);
-        for n=1:(N/2)
-            %Left an right KBN windows (w-left is the inverse of w_right)
-           w_left_2048(n)=sqrt( sum(w(1:n) )/sum(w(1:N/2+1)) ) ;
-           w_right_2048(1025-n)=sqrt( sum(w(1:n) )/sum(w(1:N/2+1)) ) ;
-        end
-        
-        w=kaiser(128+1,4*pi);
-        
-        w_left_256=zeros(128,1);
-        w_right_256=zeros(128,1);
-        for n=1:(256/2)
-            %Left an right KBN windows (w-left is the inverse of w_right)
-           w_left_256(n)=sqrt( sum(w(1:n) )/sum(w(1:128+1)) ) ;
-           w_right_256(129-n)=sqrt( sum(w(1:n) )/sum(w(1:128+1)) ) ;
-        end
-    else
-        %Sinusoid windows
-        w_left_2048=zeros(1024,1);
-        w_right_2048=zeros(1024,1);
-        for n=1:2048
-            if(n<=1024)
-                w_left_2048(n)= sin( (pi/N)*(n-1+1/2)  );
-            else
-                w_right_2048(n-N/2)=sin( (pi/N)*(n-1+1/2)  );
-            end
-        end 
-        w_left_256=zeros(128,1);
-        w_right_256=zeros(128,1);
-         for n=1:256
-             if(n<=128)
-                w_left_256(n)= sin( (pi/256)*(n-1+1/2)  );
-            else
-                w_right_256(n-128)=sin( (pi/256)*(n-1+1/2)  );
-            end
-         end
-        %disp( length(w_left_2048) );
-    end
+    persistent w_left_2048 w_right_2048 w_left_256 w_right_256 wPersistent
     
+    flag = false;
+    if isempty(wPersistent)
+        wPersistent = winType;
+    else
+        flag = wPersistent ~= winType;
+    end
+        
+    if isempty(w_left_2048) || flag
+        if( winType=="KBD")
+
+            w=kaiser(1024+1,6*pi); 
+
+            w_left_2048=zeros(1024,1);
+            w_right_2048=zeros(1024,1);
+            for n=1:(N/2)
+                %Left an right KBN windows (w-left is the inverse of w_right)
+               w_left_2048(n)=sqrt( sum(w(1:n) )/sum(w(1:N/2+1)) ) ;
+               w_right_2048(1025-n)=sqrt( sum(w(1:n) )/sum(w(1:N/2+1)) ) ;
+            end
+
+            w=kaiser(128+1,4*pi);
+
+            w_left_256=zeros(128,1);
+            w_right_256=zeros(128,1);
+            for n=1:(256/2)
+                %Left an right KBN windows (w-left is the inverse of w_right)
+               w_left_256(n)=sqrt( sum(w(1:n) )/sum(w(1:128+1)) ) ;
+               w_right_256(129-n)=sqrt( sum(w(1:n) )/sum(w(1:128+1)) ) ;
+            end
+        else
+            %Sinusoid windows
+            w_left_2048=zeros(1024,1);
+            w_right_2048=zeros(1024,1);
+            for n=1:2048
+                if(n<=1024)
+                    w_left_2048(n)= sin( (pi/N)*(n-1+1/2)  );
+                else
+                    w_right_2048(n-N/2)=sin( (pi/N)*(n-1+1/2)  );
+                end
+            end 
+            w_left_256=zeros(128,1);
+            w_right_256=zeros(128,1);
+             for n=1:256
+                 if(n<=128)
+                    w_left_256(n)= sin( (pi/256)*(n-1+1/2)  );
+                else
+                    w_right_256(n-128)=sin( (pi/256)*(n-1+1/2)  );
+                end
+             end
+            %disp( length(w_left_2048) );
+        end
+        wPersistent = winType;
+    end
     
     if (frameType=="OLS")
         frameT(1:N/2,:)=frameT(1:N/2,:).*[w_left_2048 w_left_2048];
@@ -79,7 +89,6 @@ function frameT = iFilterbank(frameF, frameType, winType)
             frameT((449:704) + (i-1) * 128,:) = frameT((449:704) + (i-1) * 128,:) +...
                 frames(:,:,i);
         end
-        
         
     end
 

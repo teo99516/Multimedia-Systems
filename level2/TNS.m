@@ -93,8 +93,8 @@ function [ frameFout, TNScoeffs ] = TNS(frameFin, frameType)
         %Apply FIR filter               
         frameFout=filter(optimized_a_coef,1,frameFin);
         flag_stable=isstable(1,optimized_a_coef);
-        if flag_stable==0
-            steady=0;
+        if ~flag_stable
+            warning('Unstable TNS Coefficients filter');
         end
         
         %Return the positive values of a
@@ -105,6 +105,22 @@ end
 
 % A simplified quantizer that quantizes in the largest value of every partition
 function [quantized_value]= quanti(in_value)
-    quantized_value = max(min(floor((in_value+0.1)*10)/10-0.05,0.75),-0.75); %16 quants
-    %quantized_value = max(min(floor((in_value+0.05)*10)/10,0.7),-0.7);      %15 quants
+    quantized_value = max(min(floor((in_value+0.1)*10)/10-0.05,0.75),-0.75); %16 levels
+    % Create the quantizer functon
+    % in_value = -0.9:0.0001:0.9;
+    % quantized_value = max(min(floor((in_value+0.1)*10)/10-0.05,0.75),-0.75);
+    % plot([in_value NaN zeros(1,length(in_value))],[zeros(1,length(in_value)) NaN in_value],'color','black')
+    % hold on;
+    % for i = -0.7:0.1:0.7
+    %     plot(i*ones(1,2),[-0.9;0.9],':','MarkerSize',0.1,'color','black');
+    % end
+    % for i = -0.75:0.1:0.75
+    %     plot([-0.9;0.9],i*ones(1,2),':','MarkerSize',0.1,'color','black');
+    % end
+    % plot(in_value,quantized_value,'LineWidth',1,'color','red')
+    % title('4 Bit Quantizer - Dequantizer Figure')
+    % xlabel('Input Value');
+    % ylabel('Dequantized Value');
+    % xticks(-0.7:0.1:0.7)
+    % yticks(-0.75:0.1:0.75)
 end

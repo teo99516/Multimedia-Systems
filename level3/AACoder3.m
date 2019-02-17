@@ -1,7 +1,7 @@
 function AACSeq3 = AACoder3(fNameIn, fnameAACoded)
     % AACoder3 creates an encoded array [AACSeq3] of audio sequences coded by the advanced audio coding standard
     table=load('TableB219.mat');
-    windowType = "KBD";
+    windowType = "SIN";
     huffLUT = loadLUT();
     forceCodebook = 12;
     audio = audioread(fNameIn);
